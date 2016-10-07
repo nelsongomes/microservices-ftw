@@ -13,7 +13,7 @@ public class ServerMain {
     ServerMain.log.info("Starting jetty version {}", Server.getVersion());
 
     // configure jetty server
-    Server jettyServer = new Server(8081);
+    Server jettyServer = new Server(8080);
 
     // setup up access log
     final NCSARequestLog requestLog = new NCSARequestLog("logs/access-yyyy_mm_dd.log");
