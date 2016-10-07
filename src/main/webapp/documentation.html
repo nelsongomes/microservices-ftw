@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<title>API Document</title>
+
+<xmp theme="united" style="display:none;">
+#Microservices FTW REST API
+
+
+## HTTP:///api
+
+
+Microservices FTW is a sample Swagger
+                  project using Jetty and Jersey.
+
+
+[**Contact the developer**](mailto:nelson.ricardo.gomes@gmail.com)
+
+
+**Version** v1
+
+[**Terms of Service**](http://terms-and-conditions.com)
+
+[**Apache 2.0**](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+
+
+
+
+
+
+
+
+
+# APIs
+
+
+## /v1/books
+
+
+### GET
+
+<a id="getBooks">List Books method</a>
+
+Method to get a books list.
+
+
+
+
+
+
+
+#### Request
+
+
+
+##### Parameters
+
+
+
+
+
+
+#### Response
+
+**Content-Type: ** application/json
+
+
+| Status Code | Reason      | Response Model |
+|-------------|-------------|----------------|
+| 200    | successful operation | Array[<a href="#/definitions/Book">Book</a>]|
+| 500    | unsuccessful operation |  - |
+
+
+
+
+
+
+
+### POST
+
+
+<a id="createBooks">Create Books method</a>
+
+Method to create one or more books.
+
+
+
+
+
+
+
+#### Request
+
+
+
+##### Parameters
+
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Located in</th>
+        <th>Required</th>
+        <th>Description</th>
+        <th>Default</th>
+        <th>Schema</th>
+    </tr>
+
+
+
+<tr>
+    <th>body</th>
+    <td>body</td>
+    <td>yes</td>
+    <td>Json array of Books</td>
+    <td> - </td>
+
+    <td>
+    Array[<a href="#/definitions/Book">Book</a>]
+    
+    </td>
+
+</tr>
+
+<tr>
+    <th>comment</th>
+    <td>query</td>
+    <td>no</td>
+    <td>sample comment</td>
+    <td> - </td>
+
+    
+            <td>string </td>
+    
+
+</tr>
+
+
+</table>
+
+
+
+#### Response
+
+**Content-Type: ** application/json
+
+
+| Status Code | Reason      | Response Model |
+|-------------|-------------|----------------|
+| 200    | successful operation |  - |
+| 500    | unsuccessful operation |  - |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## /v1/counter
+
+
+### GET
+
+<a id="getCounter">Get your cluster request counter</a>
+
+Method to get a cluster counter.
+
+
+
+
+
+
+
+#### Request
+
+
+
+##### Parameters
+
+
+
+
+
+
+#### Response
+
+**Content-Type: ** text/plain
+
+
+| Status Code | Reason      | Response Model |
+|-------------|-------------|----------------|
+| 200    | successful operation | |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## /v1/ping
+
+
+### GET
+
+<a id="pingMethod">Ping method</a>
+
+Method to check API connectivity.
+
+
+
+
+
+
+
+#### Request
+
+
+
+##### Parameters
+
+
+
+
+
+
+#### Response
+
+**Content-Type: ** text/plain
+
+
+| Status Code | Reason      | Response Model |
+|-------------|-------------|----------------|
+| 200    | successful operation | |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Definitions
+
+## <a name="/definitions/Book">Book</a>
+
+<table border="1">
+    <tr>
+        <th>name</th>
+        <th>type</th>
+        <th>required</th>
+        <th>description</th>
+        <th>example</th>
+    </tr>
+    
+        <tr>
+            <td>id</td>
+            <td>
+                
+                    
+                    integer (int32)
+                
+            </td>
+            <td>optional</td>
+            <td>Book id</td>
+            <td>1</td>
+        </tr>
+    
+        <tr>
+            <td>title</td>
+            <td>
+                
+                    
+                    string
+                
+            </td>
+            <td>required</td>
+            <td>Book title</td>
+            <td>Book Title</td>
+        </tr>
+    
+        <tr>
+            <td>isbn</td>
+            <td>
+                
+                    
+                    string
+                
+            </td>
+            <td>required</td>
+            <td>Book ISBN</td>
+            <td>Book ISNTitle</td>
+        </tr>
+    
+        <tr>
+            <td>price</td>
+            <td>
+                
+                    
+                    number (float)
+                
+            </td>
+            <td>required</td>
+            <td>Book Price</td>
+            <td>12.12</td>
+        </tr>
+    
+        <tr>
+            <td>publisher</td>
+            <td>
+                
+                    
+                    string
+                
+            </td>
+            <td>required</td>
+            <td>Publisher Name</td>
+            <td>Publisher</td>
+        </tr>
+    
+</table>
+
+
+
+</xmp>
+
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+</html>
