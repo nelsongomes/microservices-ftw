@@ -62,6 +62,11 @@ public class ApiV1 {
     return "pong";
   }
 
+  /**
+   * Method to get all books from database.
+   * 
+   * @return a List of books.
+   */
   @SuppressWarnings("static-method")
   @GET
   @Path("/books")
@@ -87,18 +92,32 @@ public class ApiV1 {
     }
   }
 
+  /**
+   * Method to query a Hazelcast cluster for total request count.
+   *
+   * @return total requests
+   */
   @SuppressWarnings("static-method")
   @GET
   @Path("/counter")
   @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation(value = "Get your cluster request counter",
-      notes = "Method to get a cluster counter.")
+  notes = "Method to get a cluster counter.")
   @ApiResponses(
       value = { @ApiResponse(code = 200, message = "successful operation", response = Long.class) })
   public Long getCounter() {
     return new Long(counter.get());
   }
 
+  /**
+   * Method to create an array of book instances.
+   *
+   * @param books
+   *          list of books
+   * @param comment
+   *          a sample book
+   * @return a boolean response.
+   */
   @POST
   @Path("/books")
   @Produces(MediaType.APPLICATION_JSON)
@@ -137,6 +156,12 @@ public class ApiV1 {
         .entity("No books received!").build();
   }
 
+  /**
+   * Method to prepare data for insertion.
+   *
+   * @param books
+   * @return an array of object arrays
+   */
   @SuppressWarnings("static-method")
   private Object[][] prepareForInsert(LinkedList<Book> books){
     Object[][] params = new Object[books.size()][];
