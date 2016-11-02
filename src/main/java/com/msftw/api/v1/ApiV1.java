@@ -18,6 +18,7 @@ import io.swagger.annotations.ResponseHeader;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.glassfish.jersey.server.ManagedAsync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -49,26 +52,29 @@ public class ApiV1 {
 
   @SuppressWarnings("static-method")
   @GET
+  @ManagedAsync
   @Path("/ping")
   @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation(value = "Ping method", notes = "Method to check API connectivity.")
   @ApiResponses(value = {
       @ApiResponse(code = 200, message = "successful operation", response = String.class) })
-  public String pingMethod(@Context final HttpServletRequest request) {
+  public void pingMethod(@Context final HttpServletRequest request,
+      @Suspended final AsyncResponse asyncResponse) {
     log.info("Received request for {} from IP {}", request.getRequestURI(),
         request.getRemoteAddr());
     counter.incrementAndGet();
 
-    return "pong";
+    asyncResponse.resume("pong");
   }
 
   /**
    * Method to get all books from database.
-   * 
+   *
    * @return a List of books.
    */
   @SuppressWarnings("static-method")
   @GET
+  @ManagedAsync
   @Path("/books")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "List Books method", notes = "Method to get a books list.")
@@ -76,19 +82,23 @@ public class ApiV1 {
       @ApiResponse(code = 200, message = "successful operation", response = Book.class,
           responseContainer = "List"),
       @ApiResponse(code = 500, message = "unsuccessful operation", response = String.class) })
-  public Response getBooks() {
+  public void getBooks(@Suspended final AsyncResponse asyncResponse) {
     counter.incrementAndGet();
-    QueryRunner runner = new QueryRunner(DatabaseHelper.getDataSource(V1_DATA_SOURCE));
+    final QueryRunner runner = new QueryRunner(DatabaseHelper.getDataSource(V1_DATA_SOURCE));
 
     try {
-      return Response.ok().entity(mapper.writeValueAsString(
-          runner.query("select * from books", new BeanListHandler<Book>(Book.class)))).build();
-    } catch (SQLException e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
-          .entity("Internal server error: " + e.getMessage()).build();
-    } catch (JsonProcessingException e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
-          .entity("Internal server error: " + e.getMessage()).build();
+      asyncResponse
+      .resume(
+          Response.ok()
+          .entity(mapper.writeValueAsString(
+              runner.query("select * from books", new BeanListHandler<>(Book.class))))
+          .build());
+    } catch (final SQLException e) {
+      asyncResponse.resume(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
+          .entity("Internal server error: " + e.getMessage()).build());
+    } catch (final JsonProcessingException e) {
+      asyncResponse.resume(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
+          .entity("Internal server error: " + e.getMessage()).build());
     }
   }
 
@@ -99,14 +109,15 @@ public class ApiV1 {
    */
   @SuppressWarnings("static-method")
   @GET
+  @ManagedAsync
   @Path("/counter")
   @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation(value = "Get your cluster request counter",
   notes = "Method to get a cluster counter.")
   @ApiResponses(
       value = { @ApiResponse(code = 200, message = "successful operation", response = Long.class) })
-  public Long getCounter() {
-    return new Long(counter.get());
+  public void getCounter(@Suspended final AsyncResponse asyncResponse) {
+    asyncResponse.resume(new Long(counter.get()));
   }
 
   /**
@@ -129,13 +140,13 @@ public class ApiV1 {
       responseHeaders = {@ResponseHeader(name="X-Host", description="hostname that failed")}) })
   public Response createBooks(
       @ApiParam(value = "Json array of Books", required = true) final LinkedList<Book> books,
-      @ApiParam(value = "sample comment", required = false) @QueryParam("comment") String comment) {
+      @ApiParam(value = "sample comment", required = false) @QueryParam("comment") final String comment) {
     counter.incrementAndGet();
     if (books != null && books.size() > 0) {
-      QueryRunner runner = new QueryRunner(DatabaseHelper.getDataSource(V1_DATA_SOURCE));
+      final QueryRunner runner = new QueryRunner(DatabaseHelper.getDataSource(V1_DATA_SOURCE));
 
       try {
-        int[] records = runner.batch(
+        final int[] records = runner.batch(
             "insert into books (title, isbn, price, publisher) values (?,?,?,?)",
             this.prepareForInsert(books));
 
@@ -145,7 +156,7 @@ public class ApiV1 {
           return Response.ok().entity(Boolean.TRUE).build();
         }
         return Response.ok().entity(Boolean.FALSE).build();
-      } catch (SQLException e) {
+      } catch (final SQLException e) {
         log.error("failed insert", e);
         return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
             .entity("Failed insert: " + e.getMessage()).build();
@@ -163,11 +174,11 @@ public class ApiV1 {
    * @return an array of object arrays
    */
   @SuppressWarnings("static-method")
-  private Object[][] prepareForInsert(LinkedList<Book> books){
-    Object[][] params = new Object[books.size()][];
+  private Object[][] prepareForInsert(final LinkedList<Book> books){
+    final Object[][] params = new Object[books.size()][];
 
     for (int i = 0; i < books.size(); i++) {
-      Book book = books.get(i);
+      final Book book = books.get(i);
       params[i] = new Object[] { book.getTitle(), book.getIsbn(), book.getPrice(),
           book.getPublisher() };
     }
