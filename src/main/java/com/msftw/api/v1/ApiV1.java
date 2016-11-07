@@ -93,12 +93,15 @@ public class ApiV1 {
           .entity(mapper.writeValueAsString(
               runner.query("select * from books", new BeanListHandler<>(Book.class))))
           .build());
+      return;
     } catch (final SQLException e) {
       asyncResponse.resume(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
           .entity("Internal server error: " + e.getMessage()).build());
+      return;
     } catch (final JsonProcessingException e) {
       asyncResponse.resume(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
           .entity("Internal server error: " + e.getMessage()).build());
+      return;
     }
   }
 
@@ -130,6 +133,7 @@ public class ApiV1 {
    * @return a boolean response.
    */
   @POST
+  @ManagedAsync
   @Path("/books")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Create Books method", notes = "Method to create one or more books.")
@@ -138,9 +142,11 @@ public class ApiV1 {
           responseContainer = "List"),
       @ApiResponse(code = 500, message = "unsuccessful operation", response = String.class,
       responseHeaders = {@ResponseHeader(name="X-Host", description="hostname that failed")}) })
-  public Response createBooks(
+  public void createBooks(
       @ApiParam(value = "Json array of Books", required = true) final LinkedList<Book> books,
-      @ApiParam(value = "sample comment", required = false) @QueryParam("comment") final String comment) {
+      @ApiParam(value = "sample comment",
+          required = false) @QueryParam("comment") final String comment,
+      @Suspended final AsyncResponse asyncResponse) {
     counter.incrementAndGet();
     if (books != null && books.size() > 0) {
       final QueryRunner runner = new QueryRunner(DatabaseHelper.getDataSource(V1_DATA_SOURCE));
@@ -153,18 +159,21 @@ public class ApiV1 {
         // if sum all batchs matches
         if (books.size() == Arrays.stream(records).sum()) {
           // success
-          return Response.ok().entity(Boolean.TRUE).build();
+          asyncResponse.resume(Response.ok().entity(Boolean.TRUE).build());
+          return;
         }
-        return Response.ok().entity(Boolean.FALSE).build();
+        asyncResponse.resume(Response.ok().entity(Boolean.FALSE).build());
+        return;
       } catch (final SQLException e) {
         log.error("failed insert", e);
-        return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
-            .entity("Failed insert: " + e.getMessage()).build();
+        asyncResponse.resume(Response.status(Status.INTERNAL_SERVER_ERROR)
+            .type(MediaType.TEXT_PLAIN).entity("Failed insert: " + e.getMessage()).build());
+        return;
       }
     }
 
-    return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
-        .entity("No books received!").build();
+    asyncResponse.resume(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
+        .entity("No books received!").build());
   }
 
   /**
